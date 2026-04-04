@@ -1,6 +1,47 @@
-<!DOCTYPE html>
-<html>
-<body>
-<h1>OK</h1>
-</body>
+<!DOCTYPE html><html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>더썸테라피</title><script src="https://sdk.minepi.com/pi-sdk.js"></script><style>
+body { font-family: Arial; background:#f6f3ef; margin:0; }
+.header { background:#fff; padding:15px; font-size:20px; font-weight:bold; }
+.container { padding:20px; }
+.card { background:#fff; padding:15px; margin-bottom:10px; border-radius:10px; }
+button { padding:10px; border:none; border-radius:5px; cursor:pointer; }
+.pay { background:#9a7a46; color:#fff; }
+</style></head><body><div class="header">더썸테라피 쇼핑몰</div><div class="container"><div class="card">
+<h3>노라보데 세럼</h3>
+<p>10,000원</p>
+<button class="pay" onclick="pay()">Pi 결제하기</button>
+</div></div><script>
+Pi.init({ version: "2.0" });
+
+const APPROVE_URL = "https://thumbtherapy-server-production.up.railway.app/approve";
+const COMPLETE_URL = "https://thumbtherapy-server-production.up.railway.app/complete";
+
+function pay(){
+  Pi.createPayment({
+    amount: 0.01,
+    memo: "상품 결제",
+    metadata: { product: "thumbtherapy" }
+  },{
+    onReadyForServerApproval: function(paymentId){
+      fetch(APPROVE_URL,{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({ paymentId })
+      });
+    },
+    onReadyForServerCompletion: function(paymentId, txid){
+      fetch(COMPLETE_URL,{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({ paymentId, txid })
+      });
+    },
+    onCancel: function(){ alert("결제 취소"); },
+    onError: function(err){ console.error(err); }
+  });
+}
+</script></body>
 </html>
